@@ -2,7 +2,6 @@ import os
 import streamlit as st
 import base64
 from openai import OpenAI
-import openai
 from PIL import Image
 import numpy as np
 from streamlit_drawable_canvas import st_canvas
@@ -42,8 +41,8 @@ canvas_result = st_canvas(
 
 # API Key
 api_key = st.text_input('Ingresa tu API Key', type="password")
-os.environ['OPENAI_API_KEY'] = api_key
 
+# ✅ Cliente creado con la key del input
 client = OpenAI(api_key=api_key)
 
 # Botón de análisis
@@ -64,7 +63,8 @@ if st.button("🔍 Analizar dibujo"):
                 "Si parece una raza conocida, menciona cuál podría ser."
             )
 
-            response = openai.chat.completions.create(
+            # ✅ Usar client en lugar de openai directamente
+            response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
@@ -111,7 +111,8 @@ if st.session_state.analysis_done:
             - Cuidados básicos
             """
 
-            info_response = openai.chat.completions.create(
+            # ✅ Usar client
+            info_response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": info_prompt}],
                 max_tokens=400,
@@ -129,7 +130,8 @@ if st.session_state.analysis_done:
             crea una historia infantil corta y divertida sobre este perro.
             """
 
-            historia_response = openai.chat.completions.create(
+            # ✅ Usar client
+            historia_response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": historia_prompt}],
                 max_tokens=400,
