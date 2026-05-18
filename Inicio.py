@@ -1,146 +1,194 @@
-import os
 import streamlit as st
-import base64
 from openai import OpenAI
-from PIL import Image
-import numpy as np
-from streamlit_drawable_canvas import st_canvas
+import random
 
-# Inicializar session_state
-if 'analysis_done' not in st.session_state:
-    st.session_state.analysis_done = False
-if 'full_response' not in st.session_state:
-    st.session_state.full_response = ""
-
-def encode_image_to_base64(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
-
-# Configuración de la app
-st.set_page_config(page_title='Detector de Perros 🐶')
-st.title('🐶 Detector de Razas de Perros')
-st.subheader("Dibuja un perro y descubre qué raza podría ser")
-
-# Sidebar
-with st.sidebar:
-    st.subheader("Acerca de")
-    st.write("Esta app analiza un dibujo e intenta identificar la raza del perro y dar información útil.")
-
-# Canvas
-stroke_width = st.sidebar.slider('Grosor del trazo', 1, 30, 5)
-
-canvas_result = st_canvas(
-    stroke_width=stroke_width,
-    stroke_color="#000000",
-    background_color="#FFFFFF",
-    height=300,
-    width=400,
-    drawing_mode="freedraw",
-    key="canvas",
+# =========================
+# CONFIGURACIÓN DE LA APP
+# =========================
+st.set_page_config(
+    page_title="Creador de Fábulas ✨",
+    page_icon="📖",
+    layout="centered"
 )
 
-# API Key
-api_key = st.text_input('Ingresa tu API Key', type="password")
+# =========================
+# ESTILOS PERSONALIZADOS
+# =========================
+st.markdown("""
+<style>
+.main {
+    background: linear-gradient(to bottom, #fff8e7, #ffe4ec);
+}
 
-# ✅ Cliente creado con la key del input
-client = OpenAI(api_key=api_key)
+h1 {
+    text-align: center;
+    color: #ff4b91;
+    font-size: 3rem;
+}
 
-# Botón de análisis
-if st.button("🔍 Analizar dibujo"):
+h2, h3 {
+    color: #6a4c93;
+}
 
-    if canvas_result.image_data is not None and api_key:
+.stButton>button {
+    background-color: #ff4b91;
+    color: white;
+    border-radius: 15px;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    transition: 0.3s;
+}
 
-        with st.spinner("Analizando imagen..."):
-            # Convertir imagen
-            img_array = np.array(canvas_result.image_data)
-            image = Image.fromarray(img_array.astype('uint8')).convert('RGBA')
-            image.save("perro.png")
+.stButton>button:hover {
+    background-color: #ff85b3;
+    transform: scale(1.05);
+}
 
-            base64_image = encode_image_to_base64("perro.png")
+.story-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
 
-            prompt = (
-                "Analiza este dibujo y describe en español qué tipo de perro es. "
-                "Si parece una raza conocida, menciona cuál podría ser."
-            )
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    color: gray;
+}
+</style>
+""", unsafe_allow_html=True)
 
-            # ✅ Usar client en lugar de openai directamente
+# =========================
+# TÍTULO
+# =========================
+st.title("📖✨ Creador de Fábulas para Niños")
+st.subheader("Crea historias mágicas con moralejas increíbles 🌈")
+
+# =========================
+# SIDEBAR
+# =========================
+with st.sidebar:
+    st.header("🪄 Personaliza tu historia")
+
+    protagonista = st.text_input(
+        "👦 Nombre del protagonista",
+        placeholder="Ej: Sofía"
+    )
+
+    animal = st.selectbox(
+        "🐶 Elige un animal",
+        [
+            "León", "Conejo", "Tortuga", "Zorro",
+            "Elefante", "Perro", "Gato", "Búho"
+        ]
+    )
+
+    lugar = st.selectbox(
+        "🌳 Lugar de la historia",
+        [
+            "Bosque mágico",
+            "Castillo encantado",
+            "Selva",
+            "Espacio",
+            "Océano",
+            "Pueblo mágico"
+        ]
+    )
+
+    enseñanza = st.selectbox(
+        "💡 Moraleja",
+        [
+            "La amistad es importante",
+            "Nunca rendirse",
+            "Ser amable con los demás",
+            "Decir siempre la verdad",
+            "Trabajar en equipo"
+        ]
+    )
+
+# =========================
+# API KEY
+# =========================
+api_key = st.text_input(
+    "🔑 Ingresa tu API Key de OpenAI",
+    type="password"
+)
+
+# =========================
+# FRASES BONITAS
+# =========================
+frases = [
+    "🌟 Cada historia es una aventura nueva",
+    "🦄 La imaginación no tiene límites",
+    "📚 Las mejores historias nacen aquí",
+    "✨ Hoy puedes crear magia"
+]
+
+st.info(random.choice(frases))
+
+# =========================
+# BOTÓN PRINCIPAL
+# =========================
+if st.button("✨ Crear Fábula"):
+
+    if not api_key:
+        st.warning("⚠️ Por favor ingresa tu API Key.")
+    else:
+
+        client = OpenAI(api_key=api_key)
+
+        with st.spinner("📖 Creando una historia mágica..."):
+
+            prompt = f"""
+            Crea una fábula infantil corta y divertida en español.
+
+            Personaje principal: {protagonista}
+            Animal: {animal}
+            Lugar: {lugar}
+
+            La historia debe:
+            - Ser tierna y divertida
+            - Fácil de entender para niños
+            - Tener diálogos simples
+            - Incluir una moraleja sobre:
+            '{enseñanza}'
+            - Tener un final feliz
+            """
+
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/png;base64,{base64_image}",
-                                },
-                            },
-                        ],
+                        "content": prompt
                     }
                 ],
-                max_tokens=300,
+                max_tokens=600,
             )
 
-            resultado = response.choices[0].message.content
-            st.session_state.full_response = resultado
-            st.session_state.analysis_done = True
+            historia = response.choices[0].message.content
 
-            st.markdown("### 🐾 Resultado del análisis")
-            st.write(resultado)
+            st.markdown("## 🌟 Tu Fábula")
 
-    else:
-        st.warning("Dibuja algo y agrega tu API Key.")
-
-# Generar información
-if st.session_state.analysis_done:
-
-    st.divider()
-    st.subheader("📚 Más sobre este perro")
-
-    if st.button("📖 Generar información"):
-
-        with st.spinner("Generando información..."):
-
-            info_prompt = f"""
-            Basado en esta descripción: '{st.session_state.full_response}',
-            da información breve sobre el perro incluyendo:
-            - Características
-            - Personalidad
-            - Cuidados básicos
-            """
-
-            # ✅ Usar client
-            info_response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": info_prompt}],
-                max_tokens=400,
+            st.markdown(
+                f"""
+                <div class="story-box">
+                {historia}
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
-            st.markdown("### 🐶 Información del perro")
-            st.write(info_response.choices[0].message.content)
+            st.balloons()
 
-    if st.button("✨ Crear historia"):
-
-        with st.spinner("Creando historia..."):
-
-            historia_prompt = f"""
-            Basado en esta descripción: '{st.session_state.full_response}',
-            crea una historia infantil corta y divertida sobre este perro.
-            """
-
-            # ✅ Usar client
-            historia_response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": historia_prompt}],
-                max_tokens=400,
-            )
-
-            st.markdown("### 📖 Historia")
-            st.write(historia_response.choices[0].message.content)
-            st.write(story_response.choices[0].message.content)
-
-# Warnings for user action required
-if not api_key:
-    st.warning("Por favor ingresa tu API key.")
+# =========================
+# FOOTER
+# =========================
+st.markdown("""
+<div class="footer">
+✨ Hecho con Streamlit + OpenAI ✨
+</div>
+""", unsafe_allow_html=True)
