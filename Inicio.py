@@ -31,59 +31,215 @@ if "descripcion_personaje" not in st.session_state:
 st.markdown("""
 <style>
 
-.main {
-    background: linear-gradient(to bottom, #fff7d6, #ffe8f3);
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+/* ---------- Fondo tipo papel antiguo ---------- */
+.stApp {
+    background:
+        radial-gradient(ellipse at top, #fbf3dc 0%, #f1e4c3 60%, #e6d4a8 100%);
+    color: #3b2a1a;
+    font-family: 'EB Garamond', Georgia, serif;
 }
 
+[data-testid="stHeader"] {
+    background: transparent;
+}
+
+.block-container {
+    padding-top: 2.5rem;
+    max-width: 780px;
+}
+
+/* ---------- Texto general ---------- */
+.stApp p, .stApp li, .stApp label, .stApp span {
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 1.15rem;
+    color: #3b2a1a;
+}
+
+/* ---------- Títulos ---------- */
 h1 {
+    font-family: 'Playfair Display', Georgia, serif !important;
     text-align: center;
-    color: #ff4b91;
-    font-size: 3.2rem;
+    color: #3b2a1a !important;
+    font-size: 3.2rem !important;
+    letter-spacing: 1px;
+    padding-bottom: 0.2rem !important;
+}
+
+h1::after {
+    content: "❦";
+    display: block;
+    font-size: 1.6rem;
+    color: #a47a2c;
+    margin-top: 0.3rem;
 }
 
 h2, h3 {
-    color: #6a4c93;
+    font-family: 'Playfair Display', Georgia, serif !important;
+    color: #5a3a1c !important;
+    font-weight: 500 !important;
 }
 
+[data-testid="stHeading"] h3,
+.stApp h3 {
+    font-style: italic;
+}
+
+/* Subtítulo centrado y en cursiva */
+.stApp h3:first-of-type {
+    text-align: center;
+}
+
+/* ---------- Barra lateral ---------- */
+[data-testid="stSidebar"] {
+    background: linear-gradient(to bottom, #e9d8ad, #dcc791);
+    border-right: 2px solid #b79a5b;
+}
+
+[data-testid="stSidebar"] h2 {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    color: #4a2e14 !important;
+    border-bottom: 1px solid #a47a2c;
+    padding-bottom: 0.4rem;
+}
+
+[data-testid="stSidebar"] label p {
+    font-weight: 500;
+    color: #4a2e14 !important;
+}
+
+/* ---------- Campos de texto y selectores ---------- */
+[data-baseweb="select"] > div,
+[data-baseweb="input"] > div {
+    background-color: #fbf3dc !important;
+    border: 1px solid #b79a5b !important;
+    border-radius: 6px !important;
+}
+
+/* ---------- Botón ---------- */
 .stButton>button {
-    background-color: #ff4b91;
-    color: white;
-    border-radius: 15px;
-    border: none;
-    padding: 12px 22px;
+    background: linear-gradient(to bottom, #7a2e2e, #5c1f1f);
+    color: #fbf3dc;
+    border-radius: 6px;
+    border: 1px solid #3b1212;
+    padding: 12px 28px;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 18px;
+    letter-spacing: 1px;
     transition: 0.3s;
-    font-weight: bold;
+    box-shadow: 0px 3px 8px rgba(60, 30, 10, 0.35);
+}
+
+.stButton>button p {
+    color: #fbf3dc !important;
 }
 
 .stButton>button:hover {
-    background-color: #ff85b3;
-    transform: scale(1.05);
+    background: linear-gradient(to bottom, #944040, #6e2626);
+    border-color: #3b1212;
+    transform: translateY(-2px);
 }
 
-.story-box {
-    background-color: white;
-    padding: 25px;
-    border-radius: 25px;
-    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-    margin-top: 20px;
-    font-size: 18px;
-    line-height: 1.7;
-}
-
+/* ---------- Cita / epígrafe ---------- */
 .tip-box {
-    background-color: #fff0f7;
-    padding: 15px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    color: #6a4c93;
-    font-weight: bold;
+    text-align: center;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: #6b4a22;
+    padding: 14px 20px;
+    margin: 10px 0 25px 0;
+    border-top: 1px solid #b79a5b;
+    border-bottom: 1px solid #b79a5b;
 }
 
+/* ---------- Marco del lienzo de dibujo ---------- */
+iframe {
+    border: 3px double #8b6b3d !important;
+    border-radius: 4px;
+    box-shadow: 0px 6px 18px rgba(60, 30, 10, 0.25);
+}
+
+/* ---------- Página del cuento ---------- */
+.story-box {
+    position: relative;
+    background:
+        linear-gradient(to right, rgba(120,90,40,0.12), transparent 6%),
+        #fdf8e8;
+    padding: 50px 60px 45px 60px;
+    margin: 30px 0;
+    border: 1px solid #c9b27a;
+    border-radius: 3px;
+    box-shadow:
+        0px 12px 30px rgba(60, 30, 10, 0.30),
+        inset 0 0 40px rgba(180, 140, 70, 0.18);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 1.28rem;
+    line-height: 1.85;
+    color: #2e2014;
+}
+
+.story-box .story-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3b2a1a;
+    margin: 0 0 6px 0;
+    line-height: 1.25;
+}
+
+.story-box .ornament {
+    text-align: center;
+    color: #a47a2c;
+    font-size: 1.5rem;
+    margin-bottom: 22px;
+}
+
+.story-box p {
+    text-align: justify;
+    text-indent: 1.6em;
+    margin: 0 0 6px 0;
+    font-size: 1.28rem;
+    color: #2e2014;
+}
+
+.story-box p:first-of-type {
+    text-indent: 0;
+}
+
+.story-box p:first-of-type::first-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    float: left;
+    font-size: 4.2rem;
+    line-height: 0.85;
+    padding: 6px 10px 0 0;
+    color: #7a2e2e;
+    font-weight: 700;
+}
+
+.story-box .end-mark {
+    text-align: center;
+    color: #a47a2c;
+    font-size: 1.4rem;
+    margin-top: 25px;
+}
+
+/* ---------- Footer ---------- */
 .footer {
     text-align: center;
-    margin-top: 40px;
-    color: gray;
+    margin-top: 50px;
+    padding-top: 15px;
+    border-top: 1px solid #b79a5b;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    color: #7a6038;
+}
+
+@media (max-width: 640px) {
+    .story-box { padding: 30px 24px; }
+    h1 { font-size: 2.2rem !important; }
 }
 
 </style>
@@ -99,15 +255,15 @@ def encode_image(image_path):
 # =========================
 # TÍTULO
 # =========================
-st.title("📖✨ Cuentos de Macondo")
-st.subheader("Dibuja un personaje y crea un cuento con realismo mágico 🦋")
+st.title("Cuentos de Macondo")
+st.subheader("Dibuja un personaje y deja que la historia nazca de tu trazo")
 
 # =========================
 # SIDEBAR  (CAMBIADO: ahora pincel, grosor y género)
 # =========================
 with st.sidebar:
 
-    st.header("🪄 Personaliza tu cuento")
+    st.header("✒️ Personaliza tu cuento")
 
     genero = st.selectbox(
         "🎭 Elige el género del cuento",
@@ -182,7 +338,7 @@ st.markdown(
 # =========================
 # CANVAS DE DIBUJO
 # =========================
-st.markdown("## 🎨 Dibuja tu personaje")
+st.markdown("## ✎ Dibuja tu personaje")
 
 canvas_result = st_canvas(
     fill_color="rgba(255, 165, 0, 0.3)",
@@ -265,7 +421,7 @@ if st.button("✨ Crear Cuento"):
 
             st.success("🎉 ¡Personaje descubierto!")
 
-            st.markdown("### 🧸 Tu personaje")
+            st.markdown("### Tu personaje")
             st.write(descripcion)
 
         # =========================
@@ -338,10 +494,24 @@ if st.button("✨ Crear Cuento"):
             st.session_state.historia = historia
 
             # Dar formato para que se vea bien dentro del recuadro
-            historia_html = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", historia)
-            historia_html = historia_html.replace("\n", "<br>")
+            # Separar título y párrafos para darle forma de página de libro
+            lineas = [l.strip() for l in historia.strip().split("\n") if l.strip()]
+            titulo = re.sub(r"^(#+\s*|\*+|T[íi]tulo:\s*)", "", lineas[0])
+            titulo = re.sub(r"\*+", "", titulo).strip()
+            titulo = re.sub(r"^T[íi]tulo:\s*", "", titulo).strip(' "«»')
+            parrafos = [
+                re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", p)
+                for p in lineas[1:]
+            ]
+            cuerpo_html = "".join(f"<p>{p}</p>" for p in parrafos)
+            historia_html = (
+                f'<div class="story-title">{titulo}</div>'
+                f'<div class="ornament">❦</div>'
+                f'{cuerpo_html}'
+                f'<div class="end-mark">✦ ✦ ✦</div>'
+            )
 
-            st.markdown("## 🌟 Tu Cuento")
+            st.markdown("## Tu cuento")
 
             st.markdown(
                 f"""
@@ -352,7 +522,6 @@ if st.button("✨ Crear Cuento"):
                 unsafe_allow_html=True
             )
 
-            st.balloons()
 
 # =========================
 # FOOTER
