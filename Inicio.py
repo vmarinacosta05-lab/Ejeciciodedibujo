@@ -1,5 +1,6 @@
 import streamlit as st
 import base64
+import re
 import numpy as np
 from PIL import Image
 from openai import OpenAI
@@ -10,7 +11,7 @@ import random
 # CONFIGURACIÓN
 # =========================
 st.set_page_config(
-    page_title="Fábulas Mágicas ✨",
+    page_title="Cuentos de Macondo ✨",
     page_icon="📖",
     layout="centered"
 )
@@ -67,6 +68,7 @@ h2, h3 {
     box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
     margin-top: 20px;
     font-size: 18px;
+    line-height: 1.7;
 }
 
 .tip-box {
@@ -97,38 +99,32 @@ def encode_image(image_path):
 # =========================
 # TÍTULO
 # =========================
-st.title("📖✨ Fábulas Mágicas para Niños")
-st.subheader("Dibuja un personaje y crea una historia increíble 🌈")
+st.title("📖✨ Cuentos de Macondo")
+st.subheader("Dibuja un personaje y crea un cuento con realismo mágico 🦋")
 
 # =========================
-# SIDEBAR
+# SIDEBAR  (CAMBIADO: ahora pincel, grosor y género)
 # =========================
 with st.sidebar:
 
-    st.header("🪄 Personaliza la historia")
+    st.header("🪄 Personaliza tu cuento")
 
-    moraleja = st.selectbox(
-        "💡 Elige una moraleja",
+    genero = st.selectbox(
+        "🎭 Elige el género del cuento",
         [
-            "La amistad es importante",
-            "Nunca rendirse",
-            "Ser amable con los demás",
-            "Decir siempre la verdad",
-            "Trabajar en equipo",
-            "Compartir con otros"
+            "Realismo mágico",
+            "Romance",
+            "Misterio",
+            "Nostalgia y recuerdos",
+            "Aventura",
+            "Drama familiar",
+            "Fantasía"
         ]
     )
 
-    lugar = st.selectbox(
-        "🌍 Lugar de la aventura",
-        [
-            "Bosque mágico",
-            "Castillo encantado",
-            "Espacio",
-            "Selva misteriosa",
-            "Océano brillante",
-            "Pueblo fantástico"
-        ]
+    stroke_color = st.color_picker(
+        "🎨 Color del pincel",
+        "#000000"
     )
 
     stroke_width = st.slider(
@@ -147,13 +143,13 @@ api_key = st.text_input(
 )
 
 # =========================
-# FRASES ALEATORIAS
+# FRASES ALEATORIAS  (CAMBIADO: frases en tono literario)
 # =========================
 frases = [
     "🌟 Tu imaginación puede crear mundos mágicos",
-    "🦄 Cada dibujo tiene una historia escondida",
+    "🦋 Cada dibujo guarda un cuento esperando ser contado",
     "📚 Los mejores personajes nacen aquí",
-    "✨ Hoy puedes inventar algo increíble"
+    "☔ Quizás hoy llueva durante cuatro años en tu historia"
 ]
 
 st.markdown(
@@ -173,7 +169,7 @@ st.markdown("## 🎨 Dibuja tu personaje")
 canvas_result = st_canvas(
     fill_color="rgba(255, 165, 0, 0.3)",
     stroke_width=stroke_width,
-    stroke_color="#000000",
+    stroke_color=stroke_color,
     background_color="#FFFFFF",
     height=350,
     width=500,
@@ -184,7 +180,7 @@ canvas_result = st_canvas(
 # =========================
 # BOTÓN CREAR HISTORIA
 # =========================
-if st.button("✨ Crear Fábula"):
+if st.button("✨ Crear Cuento"):
 
     if not api_key:
         st.warning("⚠️ Por favor ingresa tu API Key.")
@@ -213,10 +209,10 @@ if st.button("✨ Crear Fábula"):
             # ANALIZAR DIBUJO
             # =========================
             descripcion_prompt = """
-            Analiza este dibujo infantil.
+            Analiza este dibujo.
 
             Describe:
-            - Qué personaje parece ser
+            - Qué personaje, objeto o figura parece ser
             - Cómo se ve
             - Qué emociones transmite
 
@@ -255,49 +251,73 @@ if st.button("✨ Crear Fábula"):
             st.write(descripcion)
 
         # =========================
-        # CREAR HISTORIA
+        # CREAR HISTORIA  (CAMBIADO: prompt con la esencia de Gabo)
         # =========================
-        with st.spinner("📖 Creando fábula mágica..."):
+        with st.spinner("📖 Escribiendo tu cuento..."):
+
+            estilo_gabo = """
+            Eres un escritor que domina el estilo literario de Gabriel García Márquez
+            y del realismo mágico latinoamericano. Tu escritura tiene estas características:
+            - Lo extraordinario se cuenta con total naturalidad, como si fuera cotidiano.
+            - Narrador omnisciente, sereno, casi de abuelo que cuenta una historia antigua.
+            - Frases largas, musicales y llenas de imágenes sensoriales
+              (olores, calor, lluvia, colores, flores, mariposas).
+            - Juegos con el tiempo: saltos al pasado y al futuro, y la sensación de que
+              el tiempo es circular.
+            - Temas de soledad, memoria, nostalgia, amor y destino.
+            - Un pueblo caribeño o colombiano como escenario, con aire de leyenda.
+            - Detalles exagerados y poéticos (hipérboles) presentados como hechos reales.
+            - Un final que cierre con una imagen poética o un giro inesperado.
+            Escribes siempre en español. No copias textos ni frases de sus obras:
+            creas una historia totalmente original inspirada en su estilo.
+            """
 
             historia_prompt = f"""
-            Basado en esta descripción:
+            Basado en esta descripción de un dibujo:
 
             {descripcion}
 
-            Crea una fábula infantil corta y divertida.
+            Escribe un cuento corto de UNA sola página (entre 300 y 400 palabras).
 
-            La historia debe:
-            - Ocurrir en: {lugar}
-            - Tener diálogos simples
-            - Ser muy imaginativa
-            - Tener un final feliz
-            - Enseñar esta moraleja:
-              '{moraleja}'
-
-            Usa lenguaje fácil para niños.
+            El cuento debe:
+            - Tener como protagonista o elemento central lo que aparece en el dibujo
+            - Ser del género: {genero}
+            - Tener un título original en la primera línea
+            - Tener la esencia y el estilo de Gabriel García Márquez
+            - Incluir al menos un elemento mágico contado como algo normal
+            - Tener un final memorable
             """
 
             historia_response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
+                        "role": "system",
+                        "content": estilo_gabo
+                    },
+                    {
                         "role": "user",
                         "content": historia_prompt
                     }
                 ],
-                max_tokens=700,
+                max_tokens=900,
+                temperature=0.9,
             )
 
             historia = historia_response.choices[0].message.content
 
             st.session_state.historia = historia
 
-            st.markdown("## 🌟 Tu Fábula Mágica")
+            # Dar formato para que se vea bien dentro del recuadro
+            historia_html = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", historia)
+            historia_html = historia_html.replace("\n", "<br>")
+
+            st.markdown("## 🌟 Tu Cuento")
 
             st.markdown(
                 f"""
                 <div class="story-box">
-                {historia}
+                {historia_html}
                 </div>
                 """,
                 unsafe_allow_html=True
