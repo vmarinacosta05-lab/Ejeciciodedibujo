@@ -122,6 +122,24 @@ with st.sidebar:
         ]
     )
 
+    personaje_gabo = st.selectbox(
+        "👤 Personajes de Gabo",
+        [
+            "Ninguno",
+            "Remedios la Bella (Cien años de soledad)",
+            "Úrsula Iguarán (Cien años de soledad)",
+            "Coronel Aureliano Buendía (Cien años de soledad)",
+            "Melquíades (Cien años de soledad)",
+            "Pilar Ternera (Cien años de soledad)",
+            "Florentino Ariza (El amor en los tiempos del cólera)",
+            "Fermina Daza (El amor en los tiempos del cólera)",
+            "Santiago Nasar (Crónica de una muerte anunciada)",
+            "Eréndira y su abuela (La increíble y triste historia de la cándida Eréndira)",
+            "El coronel (El coronel no tiene quien le escriba)",
+            "El hombre muy viejo con unas alas enormes (Un señor muy viejo con unas alas enormes)"
+        ]
+    )
+
     stroke_color = st.color_picker(
         "🎨 Color del pincel",
         "#000000"
@@ -272,6 +290,16 @@ if st.button("✨ Crear Cuento"):
             creas una historia totalmente original inspirada en su estilo.
             """
 
+            if personaje_gabo == "Ninguno":
+                instruccion_personaje = ""
+            else:
+                instruccion_personaje = (
+                    f"- Hacer que lo dibujado y el personaje {personaje_gabo} "
+                    "sean protagonistas juntos: se encuentran e interactúan en una "
+                    "situación nueva y original, respetando la personalidad y la "
+                    "esencia del personaje, sin copiar escenas ni frases de la obra"
+                )
+
             historia_prompt = f"""
             Basado en esta descripción de un dibujo:
 
@@ -281,6 +309,7 @@ if st.button("✨ Crear Cuento"):
 
             El cuento debe:
             - Tener como protagonista o elemento central lo que aparece en el dibujo
+            {instruccion_personaje}
             - Ser del género: {genero}
             - Tener un título original en la primera línea
             - Tener la esencia y el estilo de Gabriel García Márquez
@@ -329,6 +358,10 @@ if st.button("✨ Crear Cuento"):
 # FOOTER
 # =========================
 st.markdown("""
+<div class="footer">
+✨ Hecho por Valentina Marin y Samuel Acevedo✨
+</div>
+""", unsafe_allow_html=True)
 <div class="footer">
 ✨ Hecho por Valentina Marin y Samuel Acevedo✨
 </div>
