@@ -51,28 +51,41 @@ st.markdown("""
 }
 
 /* ---------- Texto general ---------- */
-.stApp p, .stApp li, .stApp label, .stApp span {
+.stApp p, .stApp li, .stApp label {
     font-family: 'EB Garamond', Georgia, serif;
     font-size: 1.15rem;
     color: #3b2a1a;
 }
 
 /* ---------- Títulos ---------- */
-h1 {
+.kicker {
+    text-align: center;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-variant: small-caps;
+    letter-spacing: 4px;
+    font-size: 1.05rem;
+    color: #8b6b3d;
+    margin-bottom: -10px;
+}
+
+.stApp h1, [data-testid="stHeading"] h1 {
     font-family: 'Playfair Display', Georgia, serif !important;
     text-align: center;
     color: #3b2a1a !important;
-    font-size: 3.2rem !important;
-    letter-spacing: 1px;
-    padding-bottom: 0.2rem !important;
+    font-size: 3.6rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px;
+    line-height: 1.15 !important;
+    padding: 0.4rem 0 0.2rem 0 !important;
 }
 
-h1::after {
-    content: "❦";
+.stApp h1::after, [data-testid="stHeading"] h1::after {
+    content: "";
     display: block;
-    font-size: 1.6rem;
-    color: #a47a2c;
-    margin-top: 0.3rem;
+    width: 180px;
+    height: 2px;
+    margin: 16px auto 4px auto;
+    background: linear-gradient(to right, transparent, #a47a2c, transparent);
 }
 
 h2, h3 {
@@ -89,6 +102,9 @@ h2, h3 {
 /* Subtítulo centrado y en cursiva */
 .stApp h3:first-of-type {
     text-align: center;
+    font-size: 1.35rem !important;
+    font-weight: 400 !important;
+    color: #6b4a22 !important;
 }
 
 /* ---------- Barra lateral ---------- */
@@ -106,7 +122,51 @@ h2, h3 {
 
 [data-testid="stSidebar"] label p {
     font-weight: 500;
+    font-size: 1.05rem !important;
     color: #4a2e14 !important;
+}
+
+[data-testid="stSidebar"] input[type="color"] {
+    border-radius: 50%;
+    border: 2px solid #a47a2c;
+}
+
+/* ---------- Iconos (restaurar fuente) ---------- */
+[data-testid="stIconMaterial"],
+.material-icons,
+[class*="material-symbols"] {
+    font-family: "Material Symbols Rounded", "Material Icons" !important;
+}
+
+/* ---------- Flecha para abrir / cerrar la barra lateral ---------- */
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="stExpandSidebarButton"],
+[data-testid="stExpandSidebarButton"] button,
+[data-testid="collapsedControl"] button {
+    background: #fbf3dc !important;
+    color: #5a3a1c !important;
+    border: 1px solid #a47a2c !important;
+    border-radius: 50% !important;
+    width: 38px;
+    height: 38px;
+    box-shadow: 0px 3px 8px rgba(60, 30, 10, 0.25);
+    transition: 0.25s;
+}
+
+[data-testid="stSidebarCollapseButton"] button:hover,
+[data-testid="stExpandSidebarButton"]:hover,
+[data-testid="stExpandSidebarButton"] button:hover,
+[data-testid="collapsedControl"] button:hover {
+    background: #7a2e2e !important;
+    color: #fbf3dc !important;
+    border-color: #3b1212 !important;
+    transform: scale(1.1);
+}
+
+[data-testid="stSidebarCollapseButton"] button *,
+[data-testid="stExpandSidebarButton"] *,
+[data-testid="collapsedControl"] button * {
+    color: inherit !important;
 }
 
 /* ---------- Campos de texto y selectores ---------- */
@@ -191,10 +251,10 @@ iframe {
 }
 
 .story-box .ornament {
-    text-align: center;
-    color: #a47a2c;
-    font-size: 1.5rem;
-    margin-bottom: 22px;
+    width: 160px;
+    height: 2px;
+    margin: 4px auto 28px auto;
+    background: linear-gradient(to right, transparent, #a47a2c, transparent);
 }
 
 .story-box p {
@@ -222,7 +282,9 @@ iframe {
 .story-box .end-mark {
     text-align: center;
     color: #a47a2c;
-    font-size: 1.4rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.6rem;
+    letter-spacing: 8px;
     margin-top: 25px;
 }
 
@@ -255,6 +317,7 @@ def encode_image(image_path):
 # =========================
 # TÍTULO
 # =========================
+st.markdown('<div class="kicker">Homenaje a Gabriel García Márquez</div>', unsafe_allow_html=True)
 st.title("Cuentos de Macondo")
 st.subheader("Dibuja un personaje y deja que la historia nazca de tu trazo")
 
@@ -506,9 +569,9 @@ if st.button("✨ Crear Cuento"):
             cuerpo_html = "".join(f"<p>{p}</p>" for p in parrafos)
             historia_html = (
                 f'<div class="story-title">{titulo}</div>'
-                f'<div class="ornament">❦</div>'
+                f'<div class="ornament"></div>'
                 f'{cuerpo_html}'
-                f'<div class="end-mark">✦ ✦ ✦</div>'
+                f'<div class="end-mark">* * *</div>'
             )
 
             st.markdown("## Tu cuento")
