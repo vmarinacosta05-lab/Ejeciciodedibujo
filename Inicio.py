@@ -1,6 +1,8 @@
 import streamlit as st
 import base64
+import io
 import re
+from xml.sax.saxutils import escape
 import numpy as np
 from PIL import Image
 from openai import OpenAI
@@ -24,6 +26,18 @@ if "historia" not in st.session_state:
 
 if "descripcion_personaje" not in st.session_state:
     st.session_state.descripcion_personaje = ""
+
+if "historia_html" not in st.session_state:
+    st.session_state.historia_html = ""
+
+if "pdf_bytes" not in st.session_state:
+    st.session_state.pdf_bytes = None
+
+if "pdf_nombre" not in st.session_state:
+    st.session_state.pdf_nombre = "cuento.pdf"
+
+if "pdf_error" not in st.session_state:
+    st.session_state.pdf_error = ""
 
 # =========================
 # ESTILOS
@@ -178,7 +192,7 @@ h2, h3 {
 }
 
 /* ---------- Botón ---------- */
-.stButton>button {
+.stButton>button, .stDownloadButton>button {
     background: linear-gradient(to bottom, #7a2e2e, #5c1f1f);
     color: #fbf3dc;
     border-radius: 6px;
@@ -191,11 +205,11 @@ h2, h3 {
     box-shadow: 0px 3px 8px rgba(60, 30, 10, 0.35);
 }
 
-.stButton>button p {
+.stButton>button p, .stDownloadButton>button p {
     color: #fbf3dc !important;
 }
 
-.stButton>button:hover {
+.stButton>button:hover, .stDownloadButton>button:hover {
     background: linear-gradient(to bottom, #944040, #6e2626);
     border-color: #3b1212;
     transform: translateY(-2px);
@@ -313,6 +327,91 @@ iframe {
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
+
+# =========================
+# FUNCIÓN PDF (libro de una página)
+# =========================
+def limpiar_texto(texto):
+    # Las fuentes estándar del PDF no incluyen emojis ni símbolos raros
+    return texto.encode("cp1252", "ignore").decode("cp1252")
+
+
+def crear_pdf(titulo, parrafos, dibujo_png):
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+    from reportlab.lib.units import cm
+    from reportlab.lib import colors
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Image as RLImage
+    )
+
+    buffer = io.BytesIO()
+    dorado = colors.HexColor("#a47a2c")
+
+    def fondo_pagina(canvas, doc):
+        ancho, alto = A4
+        canvas.saveState()
+        canvas.setFillColor(colors.HexColor("#fdf8e8"))
+        canvas.rect(0, 0, ancho, alto, stroke=0, fill=1)
+        canvas.setStrokeColor(dorado)
+        canvas.setLineWidth(1.6)
+        canvas.rect(1.2 * cm, 1.2 * cm, ancho - 2.4 * cm, alto - 2.4 * cm)
+        canvas.setLineWidth(0.5)
+        canvas.rect(1.45 * cm, 1.45 * cm, ancho - 2.9 * cm, alto - 2.9 * cm)
+        canvas.setFont("Times-Italic", 9)
+        canvas.setFillColor(colors.HexColor("#7a6038"))
+        canvas.drawCentredString(
+            ancho / 2, 0.7 * cm,
+            "Cuentos de Macondo - Hecho por Valentina Marin y Samuel Acevedo"
+        )
+        canvas.restoreState()
+
+    estilo_titulo = ParagraphStyle(
+        "titulo", fontName="Times-Bold", fontSize=24, leading=29,
+        alignment=TA_CENTER, textColor=colors.HexColor("#3b2a1a"), spaceAfter=4
+    )
+    estilo_cuerpo = ParagraphStyle(
+        "cuerpo", fontName="Times-Roman", fontSize=12.5, leading=19,
+        alignment=TA_JUSTIFY, firstLineIndent=18, spaceAfter=4,
+        textColor=colors.HexColor("#2e2014")
+    )
+    estilo_primero = ParagraphStyle("primero", parent=estilo_cuerpo, firstLineIndent=0)
+    estilo_fin = ParagraphStyle(
+        "fin", fontName="Times-Bold", fontSize=16, alignment=TA_CENTER,
+        textColor=dorado, spaceBefore=12
+    )
+
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4,
+        leftMargin=2.6 * cm, rightMargin=2.6 * cm,
+        topMargin=2.4 * cm, bottomMargin=2.2 * cm,
+        title=limpiar_texto(titulo), author="Cuentos de Macondo"
+    )
+
+    contenido = [Paragraph(escape(limpiar_texto(titulo)), estilo_titulo)]
+    contenido.append(HRFlowable(
+        width="30%", thickness=1.2, color=dorado,
+        spaceBefore=6, spaceAfter=10, hAlign="CENTER"
+    ))
+
+    if dibujo_png:
+        ancho_img = 6 * cm
+        contenido.append(RLImage(
+            io.BytesIO(dibujo_png), width=ancho_img, height=ancho_img * 350 / 500,
+            hAlign="CENTER"
+        ))
+        contenido.append(Spacer(1, 12))
+
+    for i, p in enumerate(parrafos):
+        texto = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escape(limpiar_texto(p)))
+        contenido.append(Paragraph(texto, estilo_primero if i == 0 else estilo_cuerpo))
+
+    contenido.append(Paragraph("* * *", estilo_fin))
+
+    doc.build(contenido, onFirstPage=fondo_pagina, onLaterPages=fondo_pagina)
+    return buffer.getvalue()
+
 
 # =========================
 # TÍTULO
@@ -574,17 +673,52 @@ if st.button("✨ Crear Cuento"):
                 f'<div class="end-mark">* * *</div>'
             )
 
-            st.markdown("## Tu cuento")
+            # Guardar el cuento para que no desaparezca al descargar el PDF
+            st.session_state.historia_html = historia_html
 
-            st.markdown(
-                f"""
-                <div class="story-box">
-                {historia_html}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            # Crear el PDF (dibujo sobre fondo blanco + cuento)
+            try:
+                fondo_blanco = Image.new("RGB", image.size, (255, 255, 255))
+                fondo_blanco.paste(image, mask=image.split()[3])
+                dibujo_buffer = io.BytesIO()
+                fondo_blanco.save(dibujo_buffer, format="PNG")
 
+                st.session_state.pdf_bytes = crear_pdf(
+                    titulo, lineas[1:], dibujo_buffer.getvalue()
+                )
+                nombre = re.sub(r"[^\w\-]+", "_", titulo).strip("_")[:40] or "cuento"
+                st.session_state.pdf_nombre = f"{nombre}.pdf"
+                st.session_state.pdf_error = ""
+            except Exception as e:
+                st.session_state.pdf_bytes = None
+                st.session_state.pdf_error = str(e)
+
+# =========================
+# MOSTRAR CUENTO + DESCARGA PDF
+# =========================
+if st.session_state.historia_html:
+
+    st.markdown("## Tu cuento")
+
+    st.markdown(
+        f"""
+<div class="story-box">{st.session_state.historia_html}</div>
+""",
+        unsafe_allow_html=True
+    )
+
+    if st.session_state.pdf_bytes:
+        st.download_button(
+            label="📥 Descargar cuento en PDF",
+            data=st.session_state.pdf_bytes,
+            file_name=st.session_state.pdf_nombre,
+            mime="application/pdf"
+        )
+    elif st.session_state.pdf_error:
+        st.warning(
+            "No se pudo crear el PDF. Revisa que 'reportlab' esté en requirements.txt. "
+            f"Detalle: {st.session_state.pdf_error}"
+        )
 
 # =========================
 # FOOTER
