@@ -362,7 +362,3 @@ st.markdown("""
 ✨ Hecho por Valentina Marin y Samuel Acevedo✨
 </div>
 """, unsafe_allow_html=True)
-<div class="footer">
-✨ Hecho por Valentina Marin y Samuel Acevedo✨
-</div>
-""", unsafe_allow_html=True)
